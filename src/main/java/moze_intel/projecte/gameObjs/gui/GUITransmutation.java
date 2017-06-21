@@ -93,7 +93,7 @@ public class GUITransmutation extends GuiContainer {
 	protected void drawGuiContainerForegroundLayer(int var1, int var2)
 	{
 		this.fontRendererObj.drawString(StatCollector.translateToLocal("pe.transmutation.transmute"), 6, 8, 4210752);
-		String emc = StatCollector.translateToLocal("pe.emc.emc_tooltip_prefix") + get((int) inv.emc);
+		String emc = StatCollector.translateToLocal("pe.emc.emc_tooltip_prefix") + get((int) inv.getEmc());
 		this.fontRendererObj.drawString(emc, 6, this.ySize - 94, 4210752);
 
 		if (inv.learnFlag > 0)

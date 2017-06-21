@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import moze_intel.projecte.emc.EMCMapper;
 import moze_intel.projecte.emc.FuelMapper;
 import moze_intel.projecte.gameObjs.ObjHandler;
+import moze_intel.projecte.gameObjs.items.KleinStar;
 import moze_intel.projecte.network.PacketHandler;
 import moze_intel.projecte.network.packets.SearchUpdatePKT;
 import moze_intel.projecte.playerData.Transmutation;
@@ -17,7 +18,9 @@ import moze_intel.projecte.utils.NBTWhitelist;
 import moze_intel.projecte.utils.PELogger;
 
 import com.google.common.collect.Queues;
+
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -30,8 +33,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TransmutationInventory implements IInventory
 {
-	public double emc;
-	private EntityPlayer player = null;
+	private double emc;
+	public static double maxPlayerEmc = 50000;
+	public List<ItemStack> playerKleinStars = Lists.newArrayList();//.getDouble("StoredEMC");
+	
+	public EntityPlayer player = null;
 	private static final int LOCK_INDEX = 8;
 	private static final int[] MATTER_INDEXES = new int[] {12, 11, 13, 10, 14, 21, 15, 20, 16, 19, 17, 18};
 	private static final int[] FUEL_INDEXES = new int[] {22, 23, 24, 25};
@@ -373,11 +379,28 @@ public class TransmutationInventory implements IInventory
 	{
 		return true;
 	}
+	
+	public List<ItemStack> findKleinStars(EntityPlayer player)
+	{
+		List<ItemStack> stars = Lists.newArrayList();
+		InventoryPlayer pinv = player.inventory;
+		
+		for (int i = 0; i < pinv.getSizeInventory(); i++) {
+			ItemStack item = pinv.getStackInSlot(i);
+			if (item != null && item.getItem() instanceof KleinStar && stars.size() < 20)
+			{
+				stars.add(item);
+			}
+		}
+		return stars;
+	}
 
 	@Override
 	public void openInventory() 
 	{
 		emc = Transmutation.getEmc(player);
+		playerKleinStars = findKleinStars(player);
+		
 		ItemStack[] inputLocks = Transmutation.getInputsAndLock(player);
 		System.arraycopy(inputLocks, 0, inventory, 0, 9);
 		if (this.player.worldObj.isRemote)
@@ -406,28 +429,163 @@ public class TransmutationInventory implements IInventory
 	@Override
 	public void markDirty() {}
 	
-	public void addEmc(double value)
+	public double getEmc()
 	{
-		emc += value;
+		double kleinEmc = 0;
 		
-		if (emc >= Constants.TILE_MAX_EMC || emc < 0)
+		for (int i = 0; i < playerKleinStars.size(); i++) {
+			ItemStack star = playerKleinStars.get(i);
+			NBTTagCompound nbt = star.getTagCompound();
+			kleinEmc = kleinEmc + nbt.getDouble("StoredEMC");
+		}
+		return emc + kleinEmc;
+	}
+	
+	public double getMaxEmc()
+	{
+		if (playerKleinStars.size() == 0)
 		{
-			emc = Constants.TILE_MAX_EMC;
+			return maxPlayerEmc;
+		}else
+		{
+			double kleinMaxEmc = 0;
+			
+			for (int i = 0; i < playerKleinStars.size(); i++) {
+				ItemStack star = playerKleinStars.get(i);
+				NBTTagCompound nbt = star.getTagCompound();
+				kleinMaxEmc = kleinMaxEmc + EMCHelper.getKleinStarMaxEmc(star);
+			}
+		    return kleinMaxEmc + maxPlayerEmc;
 		}
 	}
 	
-	public void removeEmc(double value) 
+	public void setEmc(double value)
 	{
-		emc -= value;
 		
-		if (emc < 0)
+		if (playerKleinStars.size() == 0)
 		{
-			emc = 0;
+			emc = value;
+		}else
+		{
+			double sett = value;
+			
+			for (int i = 0; i < playerKleinStars.size(); i++) {
+				ItemStack star = playerKleinStars.get(i);
+				NBTTagCompound nbt = star.getTagCompound();
+				double starEmc = nbt.getDouble("StoredEMC");
+				if (sett <= EMCHelper.getKleinStarMaxEmc(star))
+				{
+					nbt.setDouble("StoredEMC", sett);
+					if (EMCHelper.getKleinStarMaxEmc(star) >= sett)
+					{
+						sett = 0;
+					}else
+					{
+						sett = sett - EMCHelper.getKleinStarMaxEmc(star);
+					}
+					star.setTagCompound(nbt);
+				}
+			}
+			if (sett <= maxPlayerEmc)
+			{
+				emc = sett;
+			}
 		}
+	}
+	
+	public boolean addEmc(double value)
+	{
+		if (playerKleinStars.size() == 0)
+		{
+			if (emc + value <= maxPlayerEmc)
+			{
+				emc += value;
+				return true;
+			}
+		}else
+		{
+			double putt = value;
+			for (int i = 0; i < playerKleinStars.size(); i++) {
+				ItemStack star = playerKleinStars.get(i);
+				NBTTagCompound nbt = star.getTagCompound();
+				double starEmc = nbt.getDouble("StoredEMC");
+				if (starEmc + putt <= EMCHelper.getKleinStarMaxEmc(star))
+				{
+					nbt.setDouble("StoredEMC", starEmc + putt);
+					star.setTagCompound(nbt);
+					putt = 0;
+				}else
+				{
+					nbt.setDouble("StoredEMC", EMCHelper.getKleinStarMaxEmc(star));
+					star.setTagCompound(nbt);
+					putt = putt - (EMCHelper.getKleinStarMaxEmc(star)-starEmc);
+				}
+			}
+			if (putt == 0)
+			{
+				return true;
+			}
+			if (emc + putt <= maxPlayerEmc)
+			{
+				emc += putt;
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean removeEmc(double value) 
+	{
+		if (playerKleinStars.size() == 0)
+		{
+			if (emc - value >= 0)
+			{
+				emc -= value;
+				return true;
+			}
+		}else
+		{
+			for (int i = 0; i < playerKleinStars.size(); i++) {
+				ItemStack star = playerKleinStars.get(i);
+				NBTTagCompound nbt = star.getTagCompound();
+				double starEmc = nbt.getDouble("StoredEMC");
+				if (starEmc - value >= 0)
+				{
+					nbt.setDouble("StoredEMC", starEmc - value);
+					star.setTagCompound(nbt);
+					return true;
+				}
+			}
+			if (emc - value >= 0)
+			{
+				emc -= value;
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean hasMaxedEmc()
 	{
-		return emc >= Constants.TILE_MAX_EMC;
+		if (playerKleinStars.size() == 0)
+		{
+			return emc >= maxPlayerEmc;
+		}else
+		{
+			double kleinEmc = 0;
+			double kleinMaxEmc = 0;
+			
+			for (int i = 0; i < playerKleinStars.size(); i++) {
+				ItemStack star = playerKleinStars.get(i);
+				NBTTagCompound nbt = star.getTagCompound();
+				kleinEmc = kleinEmc + nbt.getDouble("StoredEMC");
+				kleinMaxEmc = kleinMaxEmc + EMCHelper.getKleinStarMaxEmc(star);
+			}
+			if (kleinEmc >= kleinMaxEmc && emc >= maxPlayerEmc)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

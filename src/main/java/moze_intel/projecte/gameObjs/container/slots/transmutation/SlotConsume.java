@@ -28,13 +28,16 @@ public class SlotConsume extends Slot
 		
 		double toAdd = 0;
 		
-		while (!inv.hasMaxedEmc() && stack.stackSize > 0)
+		while ((!inv.hasMaxedEmc()&&EMCHelper.getEmcValue(stack) + toAdd + inv.getEmc() <= inv.getMaxEmc()) && stack.stackSize > 0)
 		{
 			toAdd += EMCHelper.getEmcValue(stack);
 			stack.stackSize--;
 		}
 		
 		inv.addEmc(toAdd);
+		if (stack.stackSize > 0)
+		inv.player.inventory.addItemStackToInventory(stack);
+		
 		this.onSlotChanged();
 		inv.handleKnowledge(cache);
 	}
@@ -42,6 +45,6 @@ public class SlotConsume extends Slot
 	@Override
 	public boolean isItemValid(ItemStack stack)
 	{
-		return !inv.hasMaxedEmc() && (EMCHelper.doesItemHaveEmc(stack) || stack.getItem() == ObjHandler.tome);
+		return !inv.hasMaxedEmc() && EMCHelper.getEmcValue(stack) + inv.getEmc() <= inv.getMaxEmc() && (EMCHelper.doesItemHaveEmc(stack) || stack.getItem() == ObjHandler.tome);
 	}
 }

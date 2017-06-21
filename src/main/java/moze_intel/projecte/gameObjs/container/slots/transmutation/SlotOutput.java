@@ -22,7 +22,7 @@ public class SlotOutput extends Slot
 		ItemStack stack = getStack().copy();
 		stack.stackSize = amount;
 		int emcValue = amount * EMCHelper.getEmcValue(stack);
-		if (emcValue > inv.emc) {
+		if (emcValue > inv.getEmc()) {
 			//Requesting more emc than available
 			//Can not return `null` here or NPE in Container! Container expects stacksize=0-Itemstack for 'nothing'
 			stack.stackSize = 0;
@@ -47,7 +47,7 @@ public class SlotOutput extends Slot
 	public boolean canTakeStack(EntityPlayer player)
 	{
 		if (getHasStack()) {
-			return EMCHelper.getEmcValue(getStack()) <= inv.emc;
+			return EMCHelper.getEmcValue(getStack()) <= inv.getEmc();
 		}
 		return true;
 	}

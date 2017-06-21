@@ -97,7 +97,7 @@ public class TransmutationContainer extends Container
 			
 			int stackSize = 0;
 			
-			while (transmutationInventory.emc >= emc && stackSize < newStack.getMaxStackSize() && ItemHelper.hasSpace(player.inventory.mainInventory, newStack))
+			while (transmutationInventory.getEmc() >= emc && stackSize < newStack.getMaxStackSize() && ItemHelper.hasSpace(player.inventory.mainInventory, newStack))
 			{
 				transmutationInventory.removeEmc(emc);
 				ItemHelper.pushStackInInv(player.inventory, ItemHelper.getNormalizedStack(newStack));
