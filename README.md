@@ -1,4 +1,4 @@
 # ProjectE-FTB-EV
-ProjectE mod modfication for remake of FTB Insanity
+ProjectE mod, modficated for remake of FTB Insanity map
 
 Original repo: https://github.com/sinkillerj/ProjectE
