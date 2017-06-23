@@ -1,9 +1,11 @@
 package moze_intel.projecte.gameObjs.items.rings;
 
 import com.google.common.collect.Lists;
+
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import moze_intel.projecte.PECore;
+import moze_intel.projecte.api.item.IExtraFunction;
 import moze_intel.projecte.api.item.IModeChanger;
 import moze_intel.projecte.api.item.IPedestalItem;
 import moze_intel.projecte.config.ProjectEConfig;
@@ -19,6 +21,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
@@ -28,8 +31,11 @@ import net.minecraftforge.common.util.FakePlayerFactory;
 
 import java.util.List;
 
-public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeChanger
+public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeChanger, IExtraFunction
 {
+    
+    private String[] modes = {"Enemies only", "Animals only", "Mobs only", "Players"};
+    
 	public ArchangelSmite()
 	{
 		super("archangel_smite");
@@ -42,7 +48,7 @@ public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeCh
 	{
 		if (!world.isRemote && getMode(stack) == 1 && entity instanceof EntityLivingBase)
 		{
-			fireArrow(stack, world, ((EntityLivingBase) entity));
+			fireArrow(stack, world, ((EntityLivingBase) entity), getExtraMode(stack));
 		}
 	}
 
@@ -51,14 +57,14 @@ public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeCh
 	{
 		if (!world.isRemote)
 		{
-			fireArrow(stack, world, player);
+			fireArrow(stack, world, player, getExtraMode(stack));
 		}
 		return stack;
 	}
 
-	private void fireArrow(ItemStack ring, World world, EntityLivingBase shooter)
+	private void fireArrow(ItemStack ring, World world, EntityLivingBase shooter, byte mode)
 	{
-		EntityHomingArrow arrow = new EntityHomingArrow(world, shooter, 2.0F);
+		EntityHomingArrow arrow = new EntityHomingArrow(world, shooter, 2.0F, mode);
 
 		if (!(shooter instanceof EntityPlayer) || consumeFuel(((EntityPlayer) shooter), ring, EMCHelper.getEmcValue(Items.arrow), true))
 		{
@@ -93,7 +99,7 @@ public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeCh
 				{
 					for (int i = 0; i < 3; i++)
 					{
-						EntityHomingArrow arrow = new EntityHomingArrow(world, FakePlayerFactory.get(((WorldServer) world), PECore.FAKEPLAYER_GAMEPROFILE), 2.0F);
+						EntityHomingArrow arrow = new EntityHomingArrow(world, FakePlayerFactory.get(((WorldServer) world), PECore.FAKEPLAYER_GAMEPROFILE), 2.0F, getExtraMode(tile.getItemStack()));
 						arrow.posX = tile.centeredX;
 						arrow.posY = tile.centeredY + 2;
 						arrow.posZ = tile.centeredZ;
@@ -124,4 +130,43 @@ public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeCh
 		}
 		return list;
 	}
+	
+   // player.addChatComponentMessage(new ChatComponentTranslation("pe.item.mode_switch", modes[getMode(stack)]));
+ 
+	
+	public byte getExtraMode(ItemStack stack)
+    {
+	    if (stack.stackTagCompound != null)
+	    {
+        return stack.stackTagCompound.getByte("Mode");
+	    }else
+	    {
+	        return 0;
+	    }
+    }
+    
+    public String getModeDescription(ItemStack stack)
+    {
+        return modes[stack.stackTagCompound.getByte("Mode")];
+    }
+    
+    protected void changeExtraMode(ItemStack stack, EntityPlayer player)
+    {
+        byte newMode = (byte) (getExtraMode(stack) + 1);
+        stack.stackTagCompound.setByte("Mode", (newMode > modes.length - 1 ? 0 : newMode));
+        player.addChatComponentMessage(new ChatComponentTranslation("pe.item.mode_switch", modes[getExtraMode(stack)]));
+    }
+ 
+ @Override
+ @SideOnly(Side.CLIENT)
+ public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean par4) 
+ {
+     list.add(StatCollector.translateToLocal("pe.item.mode") + ": " + EnumChatFormatting.AQUA + getModeDescription(stack));
+ }
+
+    @Override
+    public void doExtraFunction(ItemStack stack, EntityPlayer player)
+    {
+        changeExtraMode(stack, player);
+    }
 }

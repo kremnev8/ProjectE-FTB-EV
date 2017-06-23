@@ -1,10 +1,13 @@
 package moze_intel.projecte.events;
 
+import sun.security.krb5.internal.tools.Klist;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import moze_intel.projecte.PECore;
 import moze_intel.projecte.gameObjs.ObjHandler;
 import moze_intel.projecte.gameObjs.container.AlchBagContainer;
+import moze_intel.projecte.gameObjs.container.TransmutationContainer;
 import moze_intel.projecte.gameObjs.items.AlchemicalBag;
+import moze_intel.projecte.gameObjs.items.KleinStar;
 import moze_intel.projecte.handlers.PlayerChecks;
 import moze_intel.projecte.playerData.AlchBagProps;
 import moze_intel.projecte.playerData.AlchemicalBags;
@@ -28,6 +31,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 
@@ -96,6 +100,29 @@ public class PlayerEvents
 		PlayerChecks.onPlayerChangeDimension((EntityPlayerMP) event.player);
 	}
 
+	
+	@SubscribeEvent
+	public void itemToss(ItemTossEvent event)
+	{
+		EntityPlayer player = event.player;
+		World world = player.worldObj;
+		
+		if (world.isRemote)
+		{
+			return;
+		}
+		
+		if (event.entityItem.getEntityItem().getItem() instanceof KleinStar)
+		{
+			if (player.openContainer instanceof TransmutationContainer)
+			{
+				TransmutationContainer cont = (TransmutationContainer)player.openContainer;
+				cont.transmutationInventory.updateKleinStars();
+			}
+		}
+	}
+	
+	
 	@SubscribeEvent
 	public void pickupItem(EntityItemPickupEvent event)
 	{

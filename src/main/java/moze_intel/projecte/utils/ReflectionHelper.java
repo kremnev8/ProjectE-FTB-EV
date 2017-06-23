@@ -14,7 +14,7 @@ public final class ReflectionHelper
 	private static final String[] arrowInGroundNames = new String[] {"inGround", "i", "field_70254_i"};
 	private static final String[] entityFireImmuneNames = new String[] {"isImmuneToFire", "ae", "field_70178_ae"};
 	private static final String[] playerCapaWalkSpeedNames = new String[] {"walkSpeed", "g", "field_75097_g"};
-
+    //no longer nedded
 	protected static boolean getArrowInGround(EntityArrow instance)
 	{
 		return cpw.mods.fml.relauncher.ReflectionHelper.getPrivateValue(EntityArrow.class, instance, arrowInGroundNames);

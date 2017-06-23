@@ -551,7 +551,9 @@ public final class WorldHelper
 						PlayerHelper.checkedPlaceBlock(((EntityPlayerMP) player), x, y, z, Blocks.fire, 0);
 					}
 	}
-
+	/**
+	 * deprecated
+	 */
 	public static boolean isArrowInGround(EntityArrow arrow)
 	{
 		return ReflectionHelper.getArrowInGround(arrow);

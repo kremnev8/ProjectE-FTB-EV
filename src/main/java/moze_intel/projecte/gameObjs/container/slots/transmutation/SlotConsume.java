@@ -33,10 +33,11 @@ public class SlotConsume extends Slot
 			toAdd += EMCHelper.getEmcValue(stack);
 			stack.stackSize--;
 		}
+		inv.player.inventory.addItemStackToInventory(stack);
 		
 		inv.addEmc(toAdd);
 		if (stack.stackSize > 0)
-		inv.player.inventory.addItemStackToInventory(stack);
+		
 		
 		this.onSlotChanged();
 		inv.handleKnowledge(cache);

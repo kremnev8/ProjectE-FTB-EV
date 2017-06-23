@@ -7,6 +7,8 @@ import moze_intel.projecte.emc.FuelMapper;
 import moze_intel.projecte.gameObjs.ObjHandler;
 import moze_intel.projecte.gameObjs.items.KleinStar;
 import moze_intel.projecte.network.PacketHandler;
+import moze_intel.projecte.network.packets.KleinStarsSyncPKT;
+import moze_intel.projecte.network.packets.PlayerInvSyncPKT;
 import moze_intel.projecte.network.packets.SearchUpdatePKT;
 import moze_intel.projecte.playerData.Transmutation;
 import moze_intel.projecte.utils.Comparators;
@@ -20,6 +22,7 @@ import moze_intel.projecte.utils.PELogger;
 import com.google.common.collect.Queues;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -131,7 +134,7 @@ public class TransmutationInventory implements IInventory
 		
 		int maxEmc = matterEmc > fuelEmc ? matterEmc : fuelEmc;
 		
-		if (maxEmc > emc)
+		if (maxEmc > this.getEmc())
 		{
 			updateOutputs();
 		}
@@ -166,7 +169,7 @@ public class TransmutationInventory implements IInventory
 		{
 			int reqEmc = EMCHelper.getEmcValue(inventory[LOCK_INDEX]);
 			
-			if (this.emc < reqEmc)
+			if (this.getEmc() < reqEmc)
 			{
 				return;
 			}
@@ -219,7 +222,7 @@ public class TransmutationInventory implements IInventory
 			{
 				ItemStack stack = iter.next();
 				
-				if (emc < EMCHelper.getEmcValue(stack))
+				if (this.getEmc() < EMCHelper.getEmcValue(stack))
 				{
 					iter.remove();
 					continue;
@@ -282,7 +285,7 @@ public class TransmutationInventory implements IInventory
 	public void writeIntoOutputSlot(int slot, ItemStack item)
 	{
 
-		if (EMCHelper.doesItemHaveEmc(item) && EMCHelper.getEmcValue(item) <= this.emc && Transmutation.hasKnowledgeForStack(item, player))
+		if (EMCHelper.doesItemHaveEmc(item) && EMCHelper.getEmcValue(item) <= this.getEmc() && Transmutation.hasKnowledgeForStack(item, player))
 		{
 			inventory[slot] = item;
 		}
@@ -399,7 +402,6 @@ public class TransmutationInventory implements IInventory
 	public void openInventory() 
 	{
 		emc = Transmutation.getEmc(player);
-		playerKleinStars = findKleinStars(player);
 		
 		ItemStack[] inputLocks = Transmutation.getInputsAndLock(player);
 		System.arraycopy(inputLocks, 0, inventory, 0, 9);
@@ -429,8 +431,24 @@ public class TransmutationInventory implements IInventory
 	@Override
 	public void markDirty() {}
 	
+	
+	public void updateKleinStars()
+	{
+		playerKleinStars = findKleinStars(player);
+		if (!player.worldObj.isRemote)
+		PacketHandler.sendTo(new KleinStarsSyncPKT(), (EntityPlayerMP) player);
+		
+	}
+	
 	public double getEmc()
 	{
+		int nKlSt = playerKleinStars.size();
+		playerKleinStars = findKleinStars(player);
+		if (playerKleinStars.size() != nKlSt)
+		{
+			updateOutputs(true);
+		}
+		
 		double kleinEmc = 0;
 		
 		for (int i = 0; i < playerKleinStars.size(); i++) {
@@ -443,6 +461,13 @@ public class TransmutationInventory implements IInventory
 	
 	public double getMaxEmc()
 	{
+		int nKlSt = playerKleinStars.size();
+		playerKleinStars = findKleinStars(player);
+		if (playerKleinStars.size() != nKlSt)
+		{
+			updateOutputs(true);
+		}
+		
 		if (playerKleinStars.size() == 0)
 		{
 			return maxPlayerEmc;
@@ -461,6 +486,12 @@ public class TransmutationInventory implements IInventory
 	
 	public void setEmc(double value)
 	{
+		int nKlSt = playerKleinStars.size();
+		playerKleinStars = findKleinStars(player);
+		if (playerKleinStars.size() != nKlSt)
+		{
+			updateOutputs(true);
+		}
 		
 		if (playerKleinStars.size() == 0)
 		{
@@ -490,11 +521,19 @@ public class TransmutationInventory implements IInventory
 			{
 				emc = sett;
 			}
+			syncInventory(player);
 		}
 	}
 	
 	public boolean addEmc(double value)
 	{
+		int nKlSt = playerKleinStars.size();
+		playerKleinStars = findKleinStars(player);
+		if (playerKleinStars.size() != nKlSt)
+		{
+			updateOutputs(true);
+		}
+		
 		if (playerKleinStars.size() == 0)
 		{
 			if (emc + value <= maxPlayerEmc)
@@ -518,24 +557,28 @@ public class TransmutationInventory implements IInventory
 				{
 					nbt.setDouble("StoredEMC", EMCHelper.getKleinStarMaxEmc(star));
 					star.setTagCompound(nbt);
-					putt = putt - (EMCHelper.getKleinStarMaxEmc(star)-starEmc);
+					putt -= (EMCHelper.getKleinStarMaxEmc(star)-starEmc);
 				}
 			}
 			if (putt == 0)
 			{
+				syncInventory(player);
 				return true;
 			}
 			if (emc + putt <= maxPlayerEmc)
 			{
 				emc += putt;
+				syncInventory(player);
 				return true;
 			}
 		}
+		
 		return false;
 	}
 	
 	public boolean removeEmc(double value) 
 	{
+		playerKleinStars = findKleinStars(player);
 		if (playerKleinStars.size() == 0)
 		{
 			if (emc - value >= 0)
@@ -545,21 +588,38 @@ public class TransmutationInventory implements IInventory
 			}
 		}else
 		{
+			double gett = value;
 			for (int i = 0; i < playerKleinStars.size(); i++) {
 				ItemStack star = playerKleinStars.get(i);
 				NBTTagCompound nbt = star.getTagCompound();
 				double starEmc = nbt.getDouble("StoredEMC");
-				if (starEmc - value >= 0)
+				if (starEmc - gett >= 0)
 				{
-					nbt.setDouble("StoredEMC", starEmc - value);
+					nbt.setDouble("StoredEMC", starEmc - gett);
 					star.setTagCompound(nbt);
-					return true;
+					gett = 0;
+				}else
+				{
+					nbt.setDouble("StoredEMC", 0);
+					star.setTagCompound(nbt);
+					gett -=starEmc;
 				}
 			}
-			if (emc - value >= 0)
+			
+			if (gett == 0)
 			{
-				emc -= value;
+				syncInventory(player);
 				return true;
+			}
+			
+			if (emc - gett >= 0)
+			{
+				emc -= gett;
+				syncInventory(player);
+				return true;
+			}else{
+				emc = 0;
+				syncInventory(player);
 			}
 		}
 		return false;
@@ -567,6 +627,7 @@ public class TransmutationInventory implements IInventory
 
 	public boolean hasMaxedEmc()
 	{
+		playerKleinStars = findKleinStars(player);
 		if (playerKleinStars.size() == 0)
 		{
 			return emc >= maxPlayerEmc;
@@ -587,5 +648,14 @@ public class TransmutationInventory implements IInventory
 			}
 		}
 		return false;
+	}
+	
+	public void syncInventory(EntityPlayer player)
+	{
+		if (player.worldObj.isRemote == false)
+		{
+		PacketHandler.sendTo(new PlayerInvSyncPKT(player), (EntityPlayerMP) player);
+		PELogger.logDebug("** SENT PLAYER INVENTORY SYNC PACKET **");
+		}
 	}
 }

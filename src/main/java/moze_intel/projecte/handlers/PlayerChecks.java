@@ -76,7 +76,7 @@ public final class PlayerChecks
 			
 			hadFlightItem.remove(player);
 		}
-		else if(shouldPlayerFly(player) && !hadFlightItem.contains(player))
+		else if(shouldPlayerFly(player) && (!hadFlightItem.contains(player)|| !player.capabilities.allowFlying))
 		{
 			if (!player.capabilities.allowFlying)
 			{

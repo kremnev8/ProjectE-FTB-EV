@@ -2,6 +2,7 @@ package moze_intel.projecte.network;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
 import cpw.mods.fml.common.network.simpleimpl.IMessage;
@@ -13,10 +14,12 @@ import moze_intel.projecte.network.packets.CheckUpdatePKT;
 import moze_intel.projecte.network.packets.CollectorSyncPKT;
 import moze_intel.projecte.network.packets.CondenserSyncPKT;
 import moze_intel.projecte.network.packets.KeyPressPKT;
+import moze_intel.projecte.network.packets.KleinStarsSyncPKT;
 import moze_intel.projecte.network.packets.KnowledgeClearPKT;
 import moze_intel.projecte.network.packets.KnowledgeSyncPKT;
 import moze_intel.projecte.network.packets.OrientationSyncPKT;
 import moze_intel.projecte.network.packets.ParticlePKT;
+import moze_intel.projecte.network.packets.PlayerInvSyncPKT;
 import moze_intel.projecte.network.packets.RelaySyncPKT;
 import moze_intel.projecte.network.packets.SearchUpdatePKT;
 import moze_intel.projecte.network.packets.SetFlyPKT;
@@ -58,6 +61,8 @@ public final class PacketHandler
 		HANDLER.registerMessage(OrientationSyncPKT.Handler.class, OrientationSyncPKT.class, 15, Side.CLIENT);
 		HANDLER.registerMessage(UpdateGemModePKT.Handler.class, UpdateGemModePKT.class, 16, Side.SERVER);
 		HANDLER.registerMessage(SyncPedestalPKT.Handler.class, SyncPedestalPKT.class, 17, Side.CLIENT);
+		HANDLER.registerMessage(PlayerInvSyncPKT.Handler.class, PlayerInvSyncPKT.class, 18, Side.CLIENT);
+		HANDLER.registerMessage(KleinStarsSyncPKT.Handler.class, KleinStarsSyncPKT.class, 19, Side.CLIENT);
 	}
 
 	public static Packet getMCPacket(IMessage message)
