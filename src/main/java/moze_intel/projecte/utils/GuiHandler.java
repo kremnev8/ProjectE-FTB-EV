@@ -17,10 +17,12 @@ import moze_intel.projecte.gameObjs.container.RMFurnaceContainer;
 import moze_intel.projecte.gameObjs.container.RelayMK1Container;
 import moze_intel.projecte.gameObjs.container.RelayMK2Container;
 import moze_intel.projecte.gameObjs.container.RelayMK3Container;
+import moze_intel.projecte.gameObjs.container.TomeContainer;
 import moze_intel.projecte.gameObjs.container.TransmutationContainer;
 import moze_intel.projecte.gameObjs.container.inventory.AlchBagInventory;
 import moze_intel.projecte.gameObjs.container.inventory.EternalDensityInventory;
 import moze_intel.projecte.gameObjs.container.inventory.MercurialEyeInventory;
+import moze_intel.projecte.gameObjs.container.inventory.TomeInventory;
 import moze_intel.projecte.gameObjs.container.inventory.TransmutationInventory;
 import moze_intel.projecte.gameObjs.gui.GUIAlchChest;
 import moze_intel.projecte.gameObjs.gui.GUICollectorMK1;
@@ -37,6 +39,7 @@ import moze_intel.projecte.gameObjs.gui.GUIRMFurnace;
 import moze_intel.projecte.gameObjs.gui.GUIRelayMK1;
 import moze_intel.projecte.gameObjs.gui.GUIRelayMK2;
 import moze_intel.projecte.gameObjs.gui.GUIRelayMK3;
+import moze_intel.projecte.gameObjs.gui.GUITome;
 import moze_intel.projecte.gameObjs.gui.GUITransmutation;
 import moze_intel.projecte.gameObjs.tiles.AlchChestTile;
 import moze_intel.projecte.gameObjs.tiles.CollectorMK1Tile;
@@ -117,6 +120,8 @@ public class GuiHandler implements IGuiHandler
 				return new CondenserMK2Container(player.inventory, (CondenserMK2Tile) tile);
 			case Constants.PEDESTAL_GUI:
 				return new PedestalContainer(player.inventory, ((DMPedestalTile) tile));
+			case Constants.TOME_GUI:
+				return new TomeContainer(player, new TomeInventory(player));
 		}
 		
 		return null;
@@ -184,6 +189,8 @@ public class GuiHandler implements IGuiHandler
 				return new GUICondenserMK2(player.inventory, (CondenserMK2Tile) tile);
 			case Constants.PEDESTAL_GUI:
 				return new GUIPedestal(player.inventory, ((DMPedestalTile) tile));
+			case Constants.TOME_GUI:
+				return new GUITome(player, new TomeInventory(player));
 		}
 		
 		return null;

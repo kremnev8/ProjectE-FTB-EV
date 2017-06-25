@@ -13,7 +13,7 @@ Source pack installation information:
 
 Standalone source installation
 ==============================
-gradlew setupDecompWorkspace eclipse
+
 To install this source code for development purposes, extract this zip file.
 It ships with a demonstration mod. Run 'gradlew setupDevWorkspace' to create
 a gradle environment primed with FML. Run 'gradlew eclipse' or 'gradlew idea' to

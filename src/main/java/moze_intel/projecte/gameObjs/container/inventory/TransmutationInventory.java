@@ -74,7 +74,7 @@ public class TransmutationInventory implements IInventory
 			
 			if (stack.getItem() == ObjHandler.tome)
 			{
-				Transmutation.setFullKnowledge(player);
+				Transmutation.setFullKnowledge(player, stack);
 			}
 			else
 			{

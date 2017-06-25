@@ -10,6 +10,7 @@ import moze_intel.projecte.gameObjs.container.slots.transmutation.SlotOutput;
 import moze_intel.projecte.gameObjs.container.slots.transmutation.SlotUnlearn;
 import moze_intel.projecte.network.PacketHandler;
 import moze_intel.projecte.network.packets.SearchUpdatePKT;
+import moze_intel.projecte.network.packets.SendClientPlayerInvPKT;
 import moze_intel.projecte.utils.EMCHelper;
 import moze_intel.projecte.utils.ItemHelper;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,14 +19,13 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
-public class TransmutationContainer extends Container
-{
+public class TransmutationContainer extends Container {
 	public TransmutationInventory transmutationInventory;
 
 	public TransmutationContainer(InventoryPlayer invPlayer, TransmutationInventory inventory)
 	{
 		this.transmutationInventory = inventory;
-		
+
 		// Transmutation Inventory
 		this.addSlotToContainer(new SlotInput(transmutationInventory, 0, 43, 23));
 		this.addSlotToContainer(new SlotInput(transmutationInventory, 1, 34, 41));
@@ -53,74 +53,79 @@ public class TransmutationContainer extends Container
 		this.addSlotToContainer(new SlotOutput(transmutationInventory, 23, 139, 50));
 		this.addSlotToContainer(new SlotOutput(transmutationInventory, 24, 177, 50));
 		this.addSlotToContainer(new SlotOutput(transmutationInventory, 25, 158, 69));
-		if (ProjectEConfig.enableUnlearnSlot)
-		this.addSlotToContainer(new SlotUnlearn(transmutationInventory, 26, 89, 97));
-		
-		//Player Inventory
-		for(int i = 0; i < 3; i++)
-			for(int j = 0; j < 9; j++) 
+		if (ProjectEConfig.enableUnlearnSlot) this.addSlotToContainer(new SlotUnlearn(transmutationInventory, 26, 89, 97));
+
+		// Player Inventory
+		for (int i = 0; i < 3; i++)
+			for (int j = 0; j < 9; j++)
 				this.addSlotToContainer(new Slot(invPlayer, j + i * 9 + 9, 35 + j * 18, 117 + i * 18));
-		
-		//Player Hotbar
+
+		// Player Hotbar
 		for (int i = 0; i < 9; i++)
 			this.addSlotToContainer(new Slot(invPlayer, i, 35 + i * 18, 175));
-		
+
 		transmutationInventory.openInventory();
 	}
 
 	@Override
-	public boolean canInteractWith(EntityPlayer var1) 
+	public boolean canInteractWith(EntityPlayer var1)
 	{
 		return true;
 	}
-	
+
 	@Override
 	public ItemStack transferStackInSlot(EntityPlayer player, int slotIndex)
 	{
 		Slot slot = this.getSlot(slotIndex);
-		
-		if (slot == null || !slot.getHasStack()) 
+
+		if (slot == null || !slot.getHasStack())
 		{
 			return null;
 		}
-		
+
 		ItemStack stack = slot.getStack();
 		ItemStack newStack = stack.copy();
-		
-		if (slotIndex <= 7) //Input Slots
+
+		if (slotIndex <= 7) // Input Slots
 		{
 			return null;
 		}
 		else if (slotIndex >= 10 && slotIndex <= 25) // Output Slots
-		{	
+		{
 			int emc = EMCHelper.getEmcValue(newStack);
-			
+
 			int stackSize = 0;
-			
+
 			while (transmutationInventory.getEmc() >= emc && stackSize < newStack.getMaxStackSize() && ItemHelper.hasSpace(player.inventory.mainInventory, newStack))
 			{
 				transmutationInventory.removeEmc(emc);
-				ItemHelper.pushStackInInv(player.inventory, ItemHelper.getNormalizedStack(newStack));
+				if (player.worldObj.isRemote) player.inventory.addItemStackToInventory(ItemHelper.getNormalizedStack(newStack));
 				stackSize++;
 			}
-			
+			if (player.worldObj.isRemote)
+			{
+				PacketHandler.sendToServer(new SendClientPlayerInvPKT(player));
+			}
+			// newStack.stackSize = stackSize;
+			// if (!player.worldObj.isRemote)
+			// ItemHelper.pushStackInInv(player.inventory, newStack);
 			transmutationInventory.updateOutputs();
 		}
-		else if (slotIndex >= 26) //Unlearn Slot and Player Inventory
+		else if (slotIndex >= 26) // Unlearn Slot and Player Inventory
 		{
 			int emc = EMCHelper.getEmcValue(stack);
-			
+
 			if (emc == 0 && stack.getItem() != ObjHandler.tome)
 			{
 				return null;
 			}
-			
-			while(!transmutationInventory.hasMaxedEmc() && stack.stackSize > 0)
+
+			while (!transmutationInventory.hasMaxedEmc() && stack.stackSize > 0)
 			{
 				transmutationInventory.addEmc(emc);
 				--stack.stackSize;
 			}
-			
+
 			transmutationInventory.handleKnowledge(newStack);
 
 			if (stack.stackSize == 0)
@@ -128,10 +133,10 @@ public class TransmutationContainer extends Container
 				slot.putStack(null);
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	@Override
 	public void onContainerClosed(EntityPlayer player)
 	{
@@ -139,19 +144,22 @@ public class TransmutationContainer extends Container
 		transmutationInventory.closeInventory();
 	}
 
-	//From LoadController.findActiveContainerFromStack
+	// From LoadController.findActiveContainerFromStack
 	private FMLSecurityManager accessibleManager = new FMLSecurityManager();
 
-	class FMLSecurityManager extends SecurityManager
-	{
+	class FMLSecurityManager extends SecurityManager {
 		Class<?>[] getStackClasses()
 		{
 			return getClassContext();
 		}
 	}
 
-	private boolean isNeiScrollWheel() {
-		final int stacktraceDepth = 3; //[getStackClasses(), isNeiScrollWheel(), slotClick(), [POSSIBLE POSITION FOR NEI IN STACKTRACE]
+	private boolean isNeiScrollWheel()
+	{
+		final int stacktraceDepth = 3; // [getStackClasses(),
+										// isNeiScrollWheel(), slotClick(),
+										// [POSSIBLE POSITION FOR NEI IN
+										// STACKTRACE]
 		Class<?>[] stacktrace = accessibleManager.getStackClasses();
 		return stacktrace.length >= stacktraceDepth && stacktrace[stacktraceDepth] != null && stacktrace[stacktraceDepth].getName().equals("codechicken.nei.FastTransferManager");
 	}
@@ -160,13 +168,13 @@ public class TransmutationContainer extends Container
 	public ItemStack slotClick(int slot, int button, int flag, EntityPlayer player)
 	{
 		if (player.worldObj.isRemote && isNeiScrollWheel()) return null;
-		if (player.worldObj.isRemote && 10 <= slot && slot <= 25) {
+		if (player.worldObj.isRemote && 10 <= slot && slot <= 25)
+		{
 			PacketHandler.sendToServer(new SearchUpdatePKT(slot, getSlot(slot).getStack()));
 		}
 		if (slot >= 0 && getSlot(slot) != null)
 		{
-			if (getSlot(slot).getStack() != null && getSlot(slot).getStack().getItem() == ObjHandler.transmutationTablet
-				&& getSlot(slot).getStack() == player.getHeldItem())
+			if (getSlot(slot).getStack() != null && getSlot(slot).getStack().getItem() == ObjHandler.transmutationTablet && getSlot(slot).getStack() == player.getHeldItem())
 			{
 				return null;
 			}
@@ -174,11 +182,11 @@ public class TransmutationContainer extends Container
 
 		return super.slotClick(slot, button, flag, player);
 	}
-	
+
 	@Override
-	public boolean canDragIntoSlot(Slot slot) 
+	public boolean canDragIntoSlot(Slot slot)
 	{
-		if (slot instanceof SlotConsume || slot instanceof SlotUnlearn || slot instanceof SlotInput || slot instanceof SlotLock||slot instanceof SlotOutput) return false;
+		if (slot instanceof SlotConsume || slot instanceof SlotUnlearn || slot instanceof SlotInput || slot instanceof SlotLock || slot instanceof SlotOutput) return false;
 		return true;
 	}
 }

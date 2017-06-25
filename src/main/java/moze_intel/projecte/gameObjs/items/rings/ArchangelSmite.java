@@ -9,6 +9,7 @@ import moze_intel.projecte.api.item.IExtraFunction;
 import moze_intel.projecte.api.item.IModeChanger;
 import moze_intel.projecte.api.item.IPedestalItem;
 import moze_intel.projecte.config.ProjectEConfig;
+import moze_intel.projecte.gameObjs.ObjHandler;
 import moze_intel.projecte.gameObjs.entity.EntityHomingArrow;
 import moze_intel.projecte.gameObjs.items.ItemPE;
 import moze_intel.projecte.gameObjs.tiles.DMPedestalTile;
@@ -21,6 +22,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
@@ -41,6 +43,7 @@ public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeCh
 		super("archangel_smite");
 		this.setMaxStackSize(1);
 		this.setNoRepair();
+		this.setCreativeTab(ObjHandler.cTab);
 	}
 
 	@Override
@@ -87,6 +90,8 @@ public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeCh
 		return itemIcon;
 	}
 
+	
+	
 	@Override
 	public void updateInPedestal(World world, int x, int y, int z)
 	{
@@ -147,12 +152,17 @@ public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeCh
     
     public String getModeDescription(ItemStack stack)
     {
-        return modes[stack.stackTagCompound.getByte("Mode")];
+    	
+        return modes[getExtraMode(stack)];
     }
     
     protected void changeExtraMode(ItemStack stack, EntityPlayer player)
     {
         byte newMode = (byte) (getExtraMode(stack) + 1);
+        if (stack.stackTagCompound == null)
+        {
+        	stack.stackTagCompound = new NBTTagCompound();
+        }
         stack.stackTagCompound.setByte("Mode", (newMode > modes.length - 1 ? 0 : newMode));
         player.addChatComponentMessage(new ChatComponentTranslation("pe.item.mode_switch", modes[getExtraMode(stack)]));
     }

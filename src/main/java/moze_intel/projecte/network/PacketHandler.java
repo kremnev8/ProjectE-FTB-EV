@@ -22,12 +22,15 @@ import moze_intel.projecte.network.packets.ParticlePKT;
 import moze_intel.projecte.network.packets.PlayerInvSyncPKT;
 import moze_intel.projecte.network.packets.RelaySyncPKT;
 import moze_intel.projecte.network.packets.SearchUpdatePKT;
+import moze_intel.projecte.network.packets.SendClientPlayerInvPKT;
 import moze_intel.projecte.network.packets.SetFlyPKT;
 import moze_intel.projecte.network.packets.StepHeightPKT;
 import moze_intel.projecte.network.packets.SwingItemPKT;
 import moze_intel.projecte.network.packets.SyncBagDataPKT;
 import moze_intel.projecte.network.packets.SyncEmcPKT;
 import moze_intel.projecte.network.packets.SyncPedestalPKT;
+import moze_intel.projecte.network.packets.TomeExDataSyncPKT;
+import moze_intel.projecte.network.packets.TomePageSyncPKT;
 import moze_intel.projecte.network.packets.UpdateGemModePKT;
 import moze_intel.projecte.utils.PELogger;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -63,6 +66,9 @@ public final class PacketHandler
 		HANDLER.registerMessage(SyncPedestalPKT.Handler.class, SyncPedestalPKT.class, 17, Side.CLIENT);
 		HANDLER.registerMessage(PlayerInvSyncPKT.Handler.class, PlayerInvSyncPKT.class, 18, Side.CLIENT);
 		HANDLER.registerMessage(KleinStarsSyncPKT.Handler.class, KleinStarsSyncPKT.class, 19, Side.CLIENT);
+		HANDLER.registerMessage(TomePageSyncPKT.Handler.class, TomePageSyncPKT.class, 20, Side.SERVER);
+		HANDLER.registerMessage(TomeExDataSyncPKT.Handler.class, TomeExDataSyncPKT.class, 21, Side.SERVER);
+		HANDLER.registerMessage(SendClientPlayerInvPKT.Handler.class, SendClientPlayerInvPKT.class, 22, Side.SERVER);
 	}
 
 	public static Packet getMCPacket(IMessage message)

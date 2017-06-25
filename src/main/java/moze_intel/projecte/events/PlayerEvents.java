@@ -1,7 +1,5 @@
 package moze_intel.projecte.events;
 
-import sun.security.krb5.internal.tools.Klist;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import moze_intel.projecte.PECore;
 import moze_intel.projecte.gameObjs.ObjHandler;
 import moze_intel.projecte.gameObjs.container.AlchBagContainer;
@@ -34,6 +32,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class PlayerEvents
 {

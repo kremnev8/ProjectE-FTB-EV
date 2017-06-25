@@ -320,6 +320,7 @@ pe.timewatch.pedestal1=Даёт бонус в %d такта(-ов) ближай�
 pe.timewatch.pedestal2=Каждый такт, ближайшие мобы двигаются в %.3f раз быстрее
 
 pe.tome.tooltip1=Открывает все знания трансмутаций, если выучить
+pe.tome.tooltip2=Нажмите C что бы выбрать что вы не хотите изучать
 
 pe.transmutation.already_using=Кто-то уже использует этот стол трансмутаций!
 pe.transmutation.transmute=Трансмутация
@@ -332,15 +333,15 @@ pe.transmutation.learned5=н
 pe.transmutation.learned6=о
 pe.transmutation.learned7=!
 
-pe.transmutation.unlearned0=Н
-pe.transmutation.unlearned1=е
-pe.transmutation.unlearned2=в
+pe.transmutation.unlearned0=З
+pe.transmutation.unlearned1=а
+pe.transmutation.unlearned2=б
 pe.transmutation.unlearned3=ы
-pe.transmutation.unlearned4=у
-pe.transmutation.unlearned5=ч
-pe.transmutation.unlearned6=е
-pe.transmutation.unlearned7=н
-pe.transmutation.unlearned8=о
+pe.transmutation.unlearned4=т
+pe.transmutation.unlearned5=о
+pe.transmutation.unlearned6=
+pe.transmutation.unlearned7=
+pe.transmutation.unlearned8=
 
 pe.update.available=Новая версия ProjectE доступна! Версия: %s
 pe.update.changelog=Используйте /projecte changelog для вызова списка изменений!
