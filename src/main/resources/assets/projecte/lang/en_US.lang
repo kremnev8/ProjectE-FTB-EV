@@ -321,6 +321,8 @@ pe.timewatch.pedestal2=Each tick, nearby mobs move %.3f times the speed
 
 pe.tome.tooltip1=Unlocks all transmutation knowledge when learned
 pe.tome.tooltip2=Press C to choose what you don't want to learn
+pe.tomegui.reset=Reset all
+pe.tomegui.page=Page
 
 pe.transmutation.already_using=Someone is already using this transmutation table!
 pe.transmutation.transmute=Transmutation

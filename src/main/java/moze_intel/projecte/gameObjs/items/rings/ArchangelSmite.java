@@ -36,7 +36,7 @@ import java.util.List;
 public class ArchangelSmite extends RingToggle implements IPedestalItem, IModeChanger, IExtraFunction
 {
     
-    private String[] modes = {"Enemies only", "Animals only", "Mobs only", "Players"};
+    private String[] modes = {"Enemies only", "Animals only", "Mobs only"};
     
 	public ArchangelSmite()
 	{

@@ -85,7 +85,7 @@ public class GUITome extends GuiContainer {
 
 		this.buttonList.add(new GuiButton(1, this.xLocation + 11, this.yLocation + 171, 14, 14, "<"));
 		this.buttonList.add(new GuiButton(2, this.xLocation + 231, this.yLocation + 171, 14, 14, ">"));
-		this.buttonList.add(new GuiButton(3, this.xLocation + 92, this.yLocation + 168, 72, 20, "Reset all"));
+		this.buttonList.add(new GuiButton(3, this.xLocation + 92, this.yLocation + 168, 72, 20, StatCollector.translateToLocal("pe.tomegui.reset")));
 
 		this.buttonList.add(new CustomGuiButton(4, this.xLocation + 172, this.yLocation + 168, false));
 		this.buttonList.add(new CustomGuiButton(5, this.xLocation + 200, this.yLocation + 168, true));
@@ -143,7 +143,7 @@ public class GUITome extends GuiContainer {
 			this.zLevel = 0.0F;
 		}
 
-		fontRendererObj.drawString("Pages:" + Integer.toString(currentPage + 1) + "/" + Integer.toString(numPages + 1), (int) (xSize / 4.5D) - (fontRendererObj.getStringWidth("Pages:   ") / 2) + 70, 8, 4210752, false);
+		fontRendererObj.drawString(StatCollector.translateToLocal("pe.tomegui.page")+ ":" + Integer.toString(currentPage + 1) + "/" + Integer.toString(numPages + 1), (int) (xSize / 4.5D) - (fontRendererObj.getStringWidth(StatCollector.translateToLocal("pe.tomegui.page") + ":   ") / 2) + 70, 8, 4210752, false);
 
 	}
 

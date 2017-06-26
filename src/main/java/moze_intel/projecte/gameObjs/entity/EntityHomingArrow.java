@@ -41,8 +41,8 @@ public class EntityHomingArrow extends EntityHomingArrowBase {
     
     private int mode = 0;
     private boolean canPickup = false;
-    // "Enemies only", "Animals only", "Mobs only", "Players"
-    private Class[] targets = { EntityMob.class, EntityAnimal.class, EntityCreature.class, EntityPlayer.class };
+    // "Enemies only", "Animals only", "Mobs only"
+    private Class[] targets = { EntityMob.class, EntityAnimal.class, EntityCreature.class };
     
     public EntityHomingArrow(World world)
     {

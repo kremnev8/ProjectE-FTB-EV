@@ -321,6 +321,8 @@ pe.timewatch.pedestal2=Каждый такт, ближайшие мобы дви
 
 pe.tome.tooltip1=Открывает все знания трансмутаций, если выучить
 pe.tome.tooltip2=Нажмите C что бы выбрать что вы не хотите изучать
+pe.tomegui.reset=Сбросить все
+pe.tomegui.page=Страница
 
 pe.transmutation.already_using=Кто-то уже использует этот стол трансмутаций!
 pe.transmutation.transmute=Трансмутация
