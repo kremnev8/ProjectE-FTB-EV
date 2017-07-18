@@ -75,7 +75,7 @@ public class ThreadCheckUpdate extends Thread
 				}
 			}
 			
-			if (!PECore.VERSION.equals(latestVersion+"EV0.3"))
+			if (!PECore.VERSION.equals(latestVersion+"EV0.4"))
 			{
 				PELogger.logInfo("Mod is outdated! Check " + curseURL + " to get the latest version (" + latestVersion + ").");
 				
